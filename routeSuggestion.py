@@ -8,6 +8,7 @@ import heapq
 import random
 from typing import List, Tuple, Dict
 import os
+import polyline
 
 
 # === Step 1: Connect to Google Maps ===
@@ -87,7 +88,8 @@ def get_route_steps(origin, destination, mode="driving", alternatives=True):
                 "to": end,
                 "distance_km": distance_km,
                 "duration_min": duration_min,
-                "mode": travel_mode
+                "mode": travel_mode,
+                "polyline": polyline.decode(step['polyline']['points'])
             }
 
             # If this step involves transit, include extra transit details
@@ -139,7 +141,7 @@ def tag_and_flatten_routes(origin, destination):
                     time = step['duration_min']
                     travel_mode = step['mode'].upper()  # Must match emission_rate keys
 
-                    all_steps.append((start, end, dist, time, travel_mode))
+                    all_steps.append((start, end, dist, time, travel_mode, step['polyline']))
                 # route_coords.append(start)
 
             # route_coords.append(end)
@@ -150,13 +152,13 @@ def tag_and_flatten_routes(origin, destination):
     return all_steps
 
 # === Step 3: Build graph ===
-emission_rate = {"DRIVING": 180, "WALKING": 50, "TRANSIT": 50, "BICYCLING": 50}
+emission_rate = {"DRIVING": 180, "WALKING": 60, "TRANSIT": 50, "BICYCLING": 50}
 
 def build_graph(steps):
     G = nx.DiGraph()
-    for start, end, dist, time, mode in steps:
+    for start, end, dist, time, mode, polyline in steps:
         emission = dist * emission_rate[mode]
-        G.add_edge(start, end, distance=dist, time=time, emission=emission, mode=mode)
+        G.add_edge(start, end, distance=dist, time=time, emission=emission, mode=mode, polyline=polyline)
     return G
 
 # === Step 4: User profiles and scoring ===
@@ -175,11 +177,18 @@ def score_path(graph, path, alpha, beta, max_time, max_emission):
     for i in range(len(path) - 1):
         data = graph[path[i]][path[i + 1]]
         steps.append(f"{path[i]} → {path[i+1]} via {data['mode']}")
-        coordinates.append(path[i])
+        # coordinates.append(path[i])
+
+        edge_polyline = data['polyline']
+        if i == 0:
+            coordinates.extend(edge_polyline)
+        else:
+            coordinates.extend(edge_polyline[1:])  # Skip duplicate point
+
         total_time += data['time']
         total_emission += data['emission']
     
-    coordinates.append(path[-1])
+    # coordinates.append(path[-1])
 
     norm_time = total_time / max_time
     norm_emission = total_emission / max_emission
