@@ -4,11 +4,15 @@ import googlemaps
 import networkx as nx
 from typing import List, Tuple, Dict
 from haversine import haversine
+import os
 
 import firebase_admin
 from firebase_admin import credentials, firestore
 
 from routeSuggestion import tag_and_flatten_routes, build_graph, score_path, give_feedback
+
+# from dotenv import load_dotenv
+# load_dotenv
 
 app = FastAPI()
 
@@ -20,9 +24,15 @@ if not firebase_admin._apps:
 # Firestore client
 db = firestore.client()
 
+print("request API key")
+
 # === Google Maps API ===
 API_KEY = "AIzaSyCp0J_hsaPdeyjtkJrBw8bmXHYET4o75rQ"  # Replace with your real API key
+# API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+# gmaps = googlemaps.Client(key=API_KEY)
 gmaps = googlemaps.Client(key=API_KEY)
+
+print("api key request successfully")
 
 # === Data ===
 emission_rate = {"DRIVING": 180, "WALKING": 50, "TRANSIT": 80, "BICYCLING": 50}
