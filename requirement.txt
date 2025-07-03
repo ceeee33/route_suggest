@@ -36,6 +36,7 @@ hyperframe==6.1.0
 idna==3.10
 msgpack==1.1.1
 networkx==3.4.2
+polyline==2.0.2
 proto-plus==1.26.1
 protobuf==6.31.1
 pyasn1==0.6.1
