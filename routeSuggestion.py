@@ -126,7 +126,7 @@ def get_route_steps(origin, destination, mode="driving", alternatives=True):
     return all_routes
 
 def tag_and_flatten_routes(origin, destination):
-    modes = ["driving", "bicycling", "walking", "transit"]
+    modes = ["DRIVING", "BICYCLING", "WALKING", "TRANSIT"]
     all_steps = []
     # all_coordinates = []
 
