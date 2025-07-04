@@ -93,7 +93,7 @@ def get_route_steps(origin, destination, mode="driving", alternatives=True):
             }
 
             # If this step involves transit, include extra transit details
-            if travel_mode == "TRANSIT":
+            if travel_mode == "transit":
                 transit = step['transit_details']
                 vehicle_type = transit['line']['vehicle']['type']
                 line_name = transit['line'].get('short_name') or transit['line'].get('name')
@@ -126,7 +126,7 @@ def get_route_steps(origin, destination, mode="driving", alternatives=True):
     return all_routes
 
 def tag_and_flatten_routes(origin, destination):
-    modes = ["DRIVING", "BICYCLING", "WALKING", "TRANSIT"]
+    modes = ["driving", "bicycling", "walking", "transit"]
     all_steps = []
     # all_coordinates = []
 
@@ -152,7 +152,7 @@ def tag_and_flatten_routes(origin, destination):
     return all_steps
 
 # === Step 3: Build graph ===
-emission_rate = {"DRIVING": 180, "WALKING": 60, "TRANSIT": 50, "BICYCLING": 50}
+emission_rate = {"driving": 100, "walking": 60, "transit": 40, "bicycling": 50}
 
 def build_graph(steps):
     G = nx.DiGraph()
