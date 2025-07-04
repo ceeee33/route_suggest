@@ -62,6 +62,8 @@ def get_route_steps(origin, destination, mode="driving", alternatives=True):
         alternatives=alternatives
     )
 
+    print(f"mode: {mode}")
+
     all_routes = []
 
     for route in directions:
@@ -75,6 +77,8 @@ def get_route_steps(origin, destination, mode="driving", alternatives=True):
             distance_km = step['distance']['value'] / 1000
             # duration_min = step['duration']['value'] / 60
             travel_mode = step['travel_mode']
+
+            print(f"travel mode: {travel_mode}")
 
             # Use duration_in_traffic if driving mode and field exists
             if mode == "driving" and 'duration_in_traffic' in step:
@@ -93,21 +97,21 @@ def get_route_steps(origin, destination, mode="driving", alternatives=True):
             }
 
             # If this step involves transit, include extra transit details
-            if travel_mode == "TRANSIT":
-                transit = step['transit_details']
-                vehicle_type = transit['line']['vehicle']['type']
-                line_name = transit['line'].get('short_name') or transit['line'].get('name')
-                departure_stop = transit['departure_stop']['name']
-                arrival_stop = transit['arrival_stop']['name']
-                num_stops = transit['num_stops']
+            # if travel_mode == "transit":
+            #     transit = step['transit_details']
+            #     vehicle_type = transit['line']['vehicle']['type']
+            #     line_name = transit['line'].get('short_name') or transit['line'].get('name')
+            #     departure_stop = transit['departure_stop']['name']
+            #     arrival_stop = transit['arrival_stop']['name']
+            #     num_stops = transit['num_stops']
 
-                step_info.update({
-                    "transit_vehicle": vehicle_type,
-                    "line": line_name,
-                    "departure_stop": departure_stop,
-                    "arrival_stop": arrival_stop,
-                    "num_stops": num_stops
-                })
+            #     step_info.update({
+            #         "transit_vehicle": vehicle_type,
+            #         "line": line_name,
+            #         "departure_stop": departure_stop,
+            #         "arrival_stop": arrival_stop,
+            #         "num_stops": num_stops
+            #     })
 
             path.append(step_info)
             # coordinates.append(start)
@@ -152,7 +156,7 @@ def tag_and_flatten_routes(origin, destination):
     return all_steps
 
 # === Step 3: Build graph ===
-emission_rate = {"DRIVING": 180, "WALKING": 60, "TRANSIT": 50, "BICYCLING": 50}
+emission_rate = {"DRIVING": 100, "WALKING": 56, "TRANSIT": 40, "BICYCLING": 40}
 
 def build_graph(steps):
     G = nx.DiGraph()
@@ -193,9 +197,7 @@ def score_path(graph, path, alpha, beta, max_time, max_emission):
     norm_time = total_time / max_time
     norm_emission = total_emission / max_emission
     score = alpha * norm_emission + beta * norm_time
-
-    print("Coor:", coordinates)
-
+    # print("Coor:", coordinates)
     return {
         "path": steps,
         "coordinates": coordinates,
